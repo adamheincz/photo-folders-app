@@ -16,7 +16,7 @@ router.get("/main", async (req, res) => {
         res.status(200).json({ success: true, data: mainFolders });
     } catch (error) {
         console.log("Error GET:main folders");
-        res.status(500).json({success: false, message: "Internal Server Error"})
+        res.status(500).json({ success: false, message: "Internal Server Error" })
     }
 });
 
@@ -37,7 +37,7 @@ router.get("/:id", async (req, res) => {
         res.status(200).json({ success: true, data: folder[0] })
     } catch (error) {
         console.log("Error GET:folder");
-        res.status(500).json({success: false, message: "Internal Server Error"}) 
+        res.status(500).json({ success: false, message: "Internal Server Error" }) 
     }
 });
 
@@ -46,7 +46,7 @@ router.post("/", async (req, res) => {
     const {title, parent_id} = req.body;
 
     if(!title) {
-        return  res.status(400).json({ success: false, message: "Title is required"})
+        return  res.status(400).json({ success: false, message: "Title is required" })
     }
 
     try {
@@ -60,7 +60,7 @@ router.post("/", async (req, res) => {
         res.status(201).json({ success: true, data: newFolder[0] })
     } catch (error) {
         console.log("Error POST:folder");
-        res.status(500).json({success: false, message: "Internal Server Error"})
+        res.status(500).json({ success: false, message: "Internal Server Error" })
     }
 });
 
@@ -69,7 +69,7 @@ router.put("/:id", async (req, res) => {
 
 });
 
-router.delete(":id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
 
 });
 

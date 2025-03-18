@@ -27,6 +27,16 @@ async function initDataBase() {
             )
         `;
 
+        await sql`
+            CREATE TABLE IF NOT EXISTS images (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            url VARCHAR(255) NOT NULL,
+            folder_id INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `;
+
         console.log("Database initialized successfully.")
     } catch (error) {
         console.log("Error initializing database. ", error);
