@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import helmet from "helmet";
 import cors from "cors";
 import folders from "./routes/folders.js";
+import images from "./routes/images.js"
 import { sql } from "./database.js"
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(helmet());
 
 app.use("/api/folders", folders);
+app.use("/api/images", images);
 
 async function initDataBase() {
     try {
@@ -29,11 +31,11 @@ async function initDataBase() {
 
         await sql`
             CREATE TABLE IF NOT EXISTS images (
-            id SERIAL PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            url VARCHAR(255) NOT NULL,
-            folder_id INT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                url VARCHAR(255) NOT NULL,
+                folder_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `;
 
