@@ -29,9 +29,20 @@ router.get("/:id", async (req, res) => {
         SELECT * FROM folders WHERE id=${id}
         `;
 
-        folder[0].subfolders = await sql`
+        // getting subfolders from database
+        const subfolders = await sql`
         SELECT * FROM folders WHERE parent_id=${id}
         `;
+
+        if (subfolders.length) folder[0].subfolders = subfolders;
+        
+
+        // getting images from database
+        const images = await sql`
+        SELECT * FROM images WHERE folder_id=${id}
+        `;
+
+        if (images.length) folder[0].images = images;
 
         console.log(folder)
         res.status(200).json({ success: true, data: folder[0] })

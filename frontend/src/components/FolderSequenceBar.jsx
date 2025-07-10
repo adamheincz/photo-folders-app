@@ -1,11 +1,29 @@
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion';
+import { useContext } from 'react';
+import FoldersContext from '../store/folders-context';
 
-export default function FolderSequenceBar({ folderSequence, onSelectFolder, onBack }) {
+export default function FolderSequenceBar({ setDirection }) {
+
+    const { folderSequence, currentFolder, openOuterFolder, goBack } = useContext(FoldersContext);
+
+    function selectFolder(folder) {
+        if (currentFolder !== folder) {
+            setDirection(-1);
+            openOuterFolder(folder);
+        }
+    }
+
+    function handleGoBack() {
+        if (folderSequence.length > 1) {
+            setDirection(-1);
+            goBack();
+        }
+    }
 
     return (
         <div className="flex items-center mb-4" >
             <button
-                onClick={onBack}
+                onClick={handleGoBack}
                 disabled={folderSequence.length === 1}
                 className="p-4 bg-zinc-900 text-white rounded-full inline-flex mr-4 disabled:text-zinc-700">
                 <span style={{ fontSize: "1rem" }} className="material-icons p-0.5">
@@ -17,25 +35,26 @@ export default function FolderSequenceBar({ folderSequence, onSelectFolder, onBa
                     <span style={{ fontSize: "1rem" }} className='material-icons text-white'>
                         more_horiz
                     </span>
-                    </button>
+                </button>
                 <ol className="w-full min-w-0 relative flex items-center justify-end gap-4 text-white font-medium leading-none overflow-x-hidden p-0.5 rounded-full">
                     <AnimatePresence initial={false} mode='popLayout'>
-                        {folderSequence.map((folder, index) =>
-                            <motion.li
-                                layout
-                                key={folder.title}
-                                initial={{ opacity: 0, x: 100 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 100 }}
-                                transition={{ duration: 0.25, ease: "easeInOut" }}
-                                className="cursor-pointer text-nowrap flex gap-4"
-                                onClick={() => onSelectFolder(folder)}>
-                                {index !== 0 &&
-                                    <span style={{ fontSize: "1rem" }} className="material-icons">
-                                        chevron_right
-                                    </span>}{folder.title}
-                            </motion.li>
-                        )}
+                                {folderSequence.map((folder, index) =>
+                                    <motion.li
+                                        layout
+                                        key={folder.id}
+                                        initial={{ opacity: 0, x: 100 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 100 }}
+                                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                                        className="cursor-pointer text-nowrap flex gap-4"
+                                        onClick={() => selectFolder(folder)}>
+                                        {index !== 0 &&
+                                            <span style={{ fontSize: "1rem" }} className="material-icons">
+                                                chevron_right
+                                            </span>}{folder.title}
+                                    </motion.li>
+                                )}
+                            
                     </AnimatePresence>
                 </ol>
             </div>

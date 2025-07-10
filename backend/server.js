@@ -3,8 +3,9 @@ import dotenv from "dotenv"
 import helmet from "helmet";
 import cors from "cors";
 import folders from "./routes/folders.js";
-import images from "./routes/images.js"
-import { sql } from "./database.js"
+import images from "./routes/images.js";
+import { sql } from "./database.js";
+import path from "path"
 
 dotenv.config();
 
@@ -12,8 +13,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cors());
+app.use(express.urlencoded({extended: false}))
 app.use(helmet());
+app.use(cors());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }))
+
+app.use("/images", express.static(path.join("backend/images")));
 
 app.use("/api/folders", folders);
 app.use("/api/images", images);
@@ -32,7 +37,6 @@ async function initDataBase() {
         await sql`
             CREATE TABLE IF NOT EXISTS images (
                 id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
                 url VARCHAR(255) NOT NULL,
                 folder_id INT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

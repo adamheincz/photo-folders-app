@@ -7,21 +7,21 @@ const router = express.Router();
 
 // uploading an image
 router.post("/", upload.single('file'), async (req, res) => {
-    const { title, folder_id } = req.body;
-    const hostUrl = "https://" + req.get("host");
+    const { folder_id } = req.body;
+    const hostUrl = "http://" + req.get("host");
     const url = hostUrl + "/images/" + req.file.filename;
 
-    if (title === null || folder_id === null) {
+    if (folder_id === null) {
         res.status(400).json({
             success: false,
-            message: "Title and folderID cannot be null."
+            message: "FolderID cannot be null."
         });
     }
 
     try {
         const newImage = await sql`
-            INSERT INTO images (title, folder_id, url)
-            VALUES (${title},${folder_id},${url})
+            INSERT INTO images (folder_id, url)
+            VALUES (${folder_id},${url})
             RETURNING *
         `;
 

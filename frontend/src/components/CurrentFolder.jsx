@@ -1,5 +1,8 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRef, useContext, useEffect, useState } from 'react';
+import FoldersContext from '../store/folders-context';
+import ImagesSkeleton from './ImagesSkeleton';
+import Images from './Images';
 
 const variants = {
     initial: (direction) => {
@@ -11,7 +14,17 @@ const variants = {
     },
 }
 
-export default function CurrentFolder({ selectedFolder, onSelectFolder, direction }) {
+export default function CurrentFolder({ direction, setDirection }) {
+
+    const { 
+        folderSequence,
+        currentID,
+        currentIsLoading,
+        openInnerFolder,
+        openMainFolder
+    } = useContext(FoldersContext);
+
+    const currentFolder = folderSequence[folderSequence.length - 1];
 
     const hiddenFileInput = useRef(null);
 
@@ -24,7 +37,45 @@ export default function CurrentFolder({ selectedFolder, onSelectFolder, directio
         handleFile(fileUploaded);
     }
 
-    console.log(hiddenFileInput)
+    function selectFolder(folder) {
+        setDirection(1);
+        openInnerFolder(folder.id);
+    }
+
+    // fetch initial folder
+    useEffect(() => {
+        openMainFolder(1);
+    }, [])
+
+    // useEffect(() => {
+    //     const fetchCurrentFolder = async () => {
+    //         try {
+    //             fetch(`http://localhost:3000/api/folders/${currentID}`)
+    //                 .then((res) => {
+    //                     return res.json();
+    //                 })
+    //                 .then((res) => {
+    //                     let folder = res.data;
+    //                     if (folder.parent_id === null) {
+    //                         openMainFolder(folder);
+    //                     } else {
+    //                         openInnerFolder(folder);
+    //                     }
+    //                 });
+    //         } catch (error) {
+    //             console.log(error);
+    //         }
+    //     }
+
+    //     let folder = folderSequence.find((e) => e.id === currentID);
+
+    //     if (folder) {
+    //         openOuterFolder(folder);
+    //     } else {
+    //         fetchCurrentFolder();
+    //     }
+
+    // }, [currentID])
 
     return (
         <div className='flex flex-col flex-1 min-h-0 relative overflow-hidden'>
@@ -34,11 +85,6 @@ export default function CurrentFolder({ selectedFolder, onSelectFolder, directio
                     Új mappa +
                 </button>
                 <div>
-                    <button
-                        className='bg-zinc-900 text-white px-4 py-2 rounded-lg mb-3'
-                        type="button" onClick={handleClick}>
-                        Kép feltöltés
-                    </button>
                     <input
                         ref={hiddenFileInput}
                         type="file"
@@ -47,7 +93,7 @@ export default function CurrentFolder({ selectedFolder, onSelectFolder, directio
                     />
                 </div>
             </div>
-            <AnimatePresence mode='popLayout' custom={direction}>
+            <AnimatePresence mode='popLayout' custom={direction} initial={false}>
                 <motion.div
                     variants={variants}
                     custom={direction}
@@ -55,31 +101,35 @@ export default function CurrentFolder({ selectedFolder, onSelectFolder, directio
                     animate="active"
                     exit="exit"
                     transition={{ ease: "easeInOut", duration: 0.35 }}
-                    key={selectedFolder.title}
+                    key={currentID}
                     className="flex flex-col flex-1 min-h-0 shrink">
-                    <div id="inner-folder" className="border-b-1 border-zinc-900 pb-8 mb-8 overflow-hidden relative">
+                    <div className="border-b-1 border-zinc-900 pb-8 mb-8 overflow-hidden relative">
                         <div>
-                            <h3
+                            <motion.h3
+                                layoutId='folders-title'
                                 className="mb-6 font-medium w-fit">
                                 Mappák
-                            </h3>
+                            </motion.h3>
                             <div>
-                                {selectedFolder.folders &&
-                                    <ul className="text-white text-2xl">
-                                        {selectedFolder.folders.map(folder =>
-                                            <li
-                                                key={folder.title}
-                                                className="cursor-pointer w-fit mb-1"
-                                                onClick={() => onSelectFolder(folder)}
-                                            >
-                                                {folder.title}
-                                            </li>
-                                        )}
-                                    </ul>
-                                }
-                                {
-                                    !selectedFolder.folders &&
-                                    <p>Nincsenek belső mappák.</p>
+                                {currentFolder &&
+                                    <>
+                                        {currentFolder.subfolders &&
+                                            <ul className="text-white text-2xl">
+                                                {currentFolder.subfolders.map(folder =>
+                                                    <li
+                                                        key={folder.title}
+                                                        className="cursor-pointer w-fit mb-1"
+                                                        onClick={() => selectFolder(folder)}
+                                                    >
+                                                        {folder.title}
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        }
+                                        {!currentFolder.subfolders &&
+                                            <p>Nincsenek belső mappák.</p>
+                                        }
+                                    </>
                                 }
                             </div>
                         </div>
@@ -88,25 +138,16 @@ export default function CurrentFolder({ selectedFolder, onSelectFolder, directio
                     <div
                         id="images" className="flex flex-col flex-1 min-h-0">
                         <h3 className="mb-6 font-medium flex-none">Fényképek</h3>
+                        {/* <p>{ currentIsLoading.toString() }</p> */}
                         <div className='flex flex-col flex-1 min-h-0'>
-                            {selectedFolder.images &&
-                                <ul
-                                    className="flex flex-wrap gap-6 shrink basis-auto min-h-0 overflow-y-scroll pr-1">
-                                    {selectedFolder.images.length &&
-                                        selectedFolder.images.map((image, index) => {
-                                            return (
-                                                <li
-                                                    key={index}
-                                                    className="w-36">
-                                                    <img className="w-36" src={image} alt="Placeholder" />
-                                                </li>
-                                            );
-                                        }
-                                        )}
-                                </ul>
-                            }
-                            {!selectedFolder.images &&
-                                <p>Nincsenek fényképek.</p>
+                            {currentFolder &&
+                                <>
+                                    <ImagesSkeleton />
+                                    <Images
+                                    images={currentFolder.images}
+                                    handleClick={handleClick}
+                                    />
+                                </>
                             }
                         </div>
                     </div>
